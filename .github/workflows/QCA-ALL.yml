@@ -1,68 +1,92 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2026 VIKINGYFY
 
-#CI项目
+# =================================================================
+# 京东云雅典娜 (AX6600) 专属云编译工作流配置 (终极版)
+# 此文件是 GitHub Actions 的“控制中枢”，负责定义何时启动编译，
+# 以及将哪些个性化全局环境变量传递给底层的编译脚本。
+# =================================================================
+
+# CI项目名称 (显示在 GitHub Actions 运行面板的标题)
 name: QCA-ALL
 
-#CI计划
+# CI触发条件 (定义什么情况下会唤醒云端服务器开始编译)
 on:
-  #自动编译：当Auto-Clean运行完成后
+  # 1. 自动触发：当名为 "Auto-Clean" 的清理工作流完成时自动启动。
+  # 这种机制通常用于上游源码发生大规模更新时，实现自动联动编译。
   workflow_run:
     workflows: ["Auto-Clean"]
     types:
       - completed
-  #手动编译
+  # 2. 手动触发：允许你在 GitHub 网页端手动点击 "Run workflow" 按钮来启动。
   workflow_dispatch:
     inputs:
       PACKAGE:
-        description: '手动调整插件包，多个请用\n符号隔开。'
+        description: '手动临时增加/排除插件包 (多包用空格隔开。我们已在 GENERAL.txt 定制好，此处通常留空)'
         required: false
         type: string
       TEST:
-        description: '仅输出配置文件，不编译固件。'
+        description: '测试模式：仅生成并输出 .config 配置文件，不执行耗时的编译过程 (常用于排查插件冲突)'
         default: 'false'
         required: false
         type: boolean
 
-#CI权限
+# 赋予 CI 读写仓库的最高权限 (必需权限，否则编译成功后无法将固件发布到 Releases 页面)
 permissions: write-all
 
-#CI任务
+# CI具体执行的任务列表
 jobs:
   config:
+    # 任务名称，会动态显示当前正在处理的配置文件名
     name: ${{matrix.CONFIG}}
     strategy:
+      # fail-fast: false 表示即使矩阵中某个任务失败，其他并行任务也会继续执行完毕
       fail-fast: false
-      #max-parallel: 3
+      # 编译矩阵：定义要循环编译的目标范围。
+      # 由于我们在 Config/IPQ60XX-WIFI-YES.txt 里已经用 # 注释掉了除雅典娜外的所有设备，
+      # 所以即便矩阵包含多项，系统也只会为你精准打磨那一台机器的固件，拒绝算力浪费。
       matrix:
         CONFIG: [IPQ60XX-WIFI-YES, IPQ60XX-WIFI-NO, IPQ807X-WIFI-YES, IPQ807X-WIFI-NO]
         SOURCE: [VIKINGYFY/immortalwrt]
         BRANCH: [main]
 
-    #调用公用编译核心WRT-CORE.yml
+    # 调用公用的核心编译流程文件 (这是真正干活的脚本，负责拉取源码、应用补丁和执行 make 编译)
     uses: ./.github/workflows/WRT-CORE.yml
     with:
-      #编译配置
+      # --- 以下是传递给编译机的“核心定制参数”，将直接烙印进系统底层 ---
+
+      # 告诉核心脚本，去 Config 文件夹里找哪个 .txt 来读取目标设备列表
       WRT_CONFIG: ${{matrix.CONFIG}}
-      #默认主题
-      WRT_THEME: aurora
-      #默认主机名
-      WRT_NAME: OWRT
-      #默认WIFI名称
+
+      # 默认后台主题：对应我们在 Packages.sh 里保留的高颜值主题
+      WRT_THEME: argon
+
+      # 默认主机名：路由器开机后，在终端命令行和局域网邻居中显示的设备名字
+      WRT_NAME: Athena
+
+      # 默认WIFI名称：刷机后或恢复出厂设置时的初始 Wi-Fi 热点名字
       WRT_SSID: OWRT
-      #默认WIFI密码
+
+      # 默认WIFI密码：初始 Wi-Fi 热点的连接密码
       WRT_WORD: 12345678
-      #默认地址
-      WRT_IP: 192.168.10.1
-      #默认密码，仅作提示，修改无用
+
+      # 默认后台管理地址
+      WRT_IP: 10.0.0.1
+
+      # 默认后台密码提示 (这只是个 UI 提示语。OpenWrt 首次登录通常无密码，登录后需强制设置)
       WRT_PW: 无
-      #源码链接
+
+      # 上游底层源码仓库地址 (每次编译，云端都会去这里拉取最新的 Linux 内核与 eBPF 基础框架)
       WRT_REPO: https://github.com/${{matrix.SOURCE}}.git
-      #源码分支
+      
+      # 上游底层源码的指定拉取分支
       WRT_BRANCH: ${{matrix.BRANCH}}
-      #源码名称
+      
+      # 源码名称标识符
       WRT_SOURCE: ${{matrix.SOURCE}}
-      #插件调整
+      
+      # 接收手动触发时输入的临时插件参数
       WRT_PACKAGE: ${{inputs.PACKAGE}}
-      #仅输出配置文件
+      
+      # 接收手动触发时是否开启测试模式的参数
       WRT_TEST: ${{inputs.TEST}}
