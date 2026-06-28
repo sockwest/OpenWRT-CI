@@ -30,6 +30,11 @@ CONFIG_PACKAGE_luci-app-homeproxy=y
 # -----------------------------------------------------------------
 # 启用标准的 SMB 共享协议 (苹果生态和 Windows 原生支持最好)
 CONFIG_PACKAGE_luci-app-samba4=y
+# 挂载 exFAT 格式的 U盘或硬盘
+CONFIG_PACKAGE_kmod-fs-exfat=y
+# 挂载 NTFS 格式的移动硬盘
+CONFIG_PACKAGE_kmod-fs-ntfs3=y
+
 # 保留必要的磁盘挂载基础组件
 CONFIG_PACKAGE_automount=y
 CONFIG_PACKAGE_blkid=y
