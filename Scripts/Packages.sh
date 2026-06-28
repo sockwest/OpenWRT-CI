@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2026 VIKINGYFY
 
-#安装和更新软件包
+# -----------------------------------------------------------------
+# UPDATE_PACKAGE 函数定义 (保持上游逻辑不变，负责清理旧包并拉取新源码)
+# -----------------------------------------------------------------
 UPDATE_PACKAGE() {
 	local PKG_NAME=$1
 	local PKG_REPO=$2
@@ -42,45 +44,61 @@ UPDATE_PACKAGE() {
 	fi
 }
 
-# 调用示例
-# UPDATE_PACKAGE "OpenAppFilter" "destan19/OpenAppFilter" "master" "" "custom_name1 custom_name2"
-# UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-appfilter oaf" 这样会把原有的open-app-filter，luci-app-appfilter，oaf相关组件删除，不会出现coremark错误。
-
-# UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
+# -----------------------------------------------------------------
+# 1. 核心主题与 UI 组件 (拉取你想保留的高颜值后台)
+# -----------------------------------------------------------------
 UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-25.12"
-UPDATE_PACKAGE "shadcn" "eamonxg/luci-theme-shadcn" "main"
-UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
-UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
-UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
-UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
+# (已注释) 移除其他不需要的冗余主题，加快编译速度
+# UPDATE_PACKAGE "shadcn" "eamonxg/luci-theme-shadcn" "main"
+# UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
+# UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
+# UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
+# UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
 
+# -----------------------------------------------------------------
+# 2. 核心代理与分流网络组件 (业务架构的基石)
+# -----------------------------------------------------------------
+# 备用带界面的全能代理方案
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
-UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
-UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
-UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
-UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
-UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
 
-UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
+# 【新增核心】引入 daed (基于 eBPF 的底层强扣引擎)
+UPDATE_PACKAGE "daed" "QiuSimons/openwrt-dae" "master" "pkg"
 
-#UPDATE_PACKAGE "athena-led" "unraveloop/JDC-AX6600-Athena-LED-Controller" "main"
-UPDATE_PACKAGE "ddns-go" "sirpdboy/luci-app-ddns-go" "main"
-UPDATE_PACKAGE "diskman" "sbwml/luci-app-diskman" "main"
-UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
-UPDATE_PACKAGE "easytier" "EasyTier/luci-app-easytier" "main"
-UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
-UPDATE_PACKAGE "netspeedtest" "sirpdboy/netspeedtest" "main" "" "homebox ookla-speedtest"
-UPDATE_PACKAGE "netwizard" "sirpdboy/luci-app-netwizard" "main"
-UPDATE_PACKAGE "openlist2" "sbwml/luci-app-openlist2" "main"
-UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
-UPDATE_PACKAGE "qbittorrent" "sbwml/luci-app-qbittorrent" "master" "" "qt6base qt6tools rblibtorrent"
-UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
-UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
-UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
-UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus"
-UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
+# (已注释) 移除我们不需要的老旧、冗余代理方案
+# UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
+# UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
+# UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
+# UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
+# UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
+# UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 
-#更新软件包版本
+# -----------------------------------------------------------------
+# 3. 实用工具包 (仅保留需要的)
+# -----------------------------------------------------------------
+# 保留网络带宽监控工具
+UPDATE_PACKAGE "nlbwmon" "sbwml/luci-app-nlbwmon" "master"
+
+# (已注释) 强制移除所有不需要的伪 NAS、磁盘管理、下载工具
+# UPDATE_PACKAGE "ddns-go" "sirpdboy/luci-app-ddns-go" "main"
+# UPDATE_PACKAGE "diskman" "sbwml/luci-app-diskman" "main"
+# UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
+# UPDATE_PACKAGE "easytier" "EasyTier/luci-app-easytier" "main"
+# UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
+# UPDATE_PACKAGE "netspeedtest" "sirpdboy/netspeedtest" "main" "" "homebox ookla-speedtest"
+# UPDATE_PACKAGE "netwizard" "sirpdboy/luci-app-netwizard" "main"
+# UPDATE_PACKAGE "openlist2" "sbwml/luci-app-openlist2" "main"
+# UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
+# UPDATE_PACKAGE "qbittorrent" "sbwml/luci-app-qbittorrent" "master" "" "qt6base qt6tools rblibtorrent"
+# UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
+# UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
+# UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
+# UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus"
+# UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
+
+
+# -----------------------------------------------------------------
+# UPDATE_VERSION 函数定义 (自动获取并同步最新底层内核版本号)
+# -----------------------------------------------------------------
 UPDATE_VERSION() {
 	local PKG_NAME=$1
 	local PKG_MARK=${2:-false}
@@ -121,8 +139,11 @@ UPDATE_VERSION() {
 	done
 }
 
-#UPDATE_VERSION "软件包名" "测试版，true，可选，默认为否"
+# -----------------------------------------------------------------
+# 4. 强制同步最新双擎内核版本
+# -----------------------------------------------------------------
 UPDATE_VERSION "sing-box"
+UPDATE_VERSION "xray-core"
 
 #引入私有扩展脚本
 if [ -f "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh" ]; then
