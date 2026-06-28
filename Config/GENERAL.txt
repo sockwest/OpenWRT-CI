@@ -10,8 +10,7 @@
 # 开启 Linux 内核 eBPF 和 BTF 支持 (daed 能够挂载并劫持底层流量的先决条件)
 CONFIG_KERNEL_BPF_EVENTS=y
 CONFIG_KERNEL_CGROUP_BPF=y
-CONFIG_KERNEL_DEBUG_INFO=y
-CONFIG_KERNEL_DEBUG_INFO_BTF=y
+
 
 # 引入核心底层劫持引擎 (负责基于 MAC 地址的物理强制扣留)
 CONFIG_PACKAGE_luci-app-daed=y
