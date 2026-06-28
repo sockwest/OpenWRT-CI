@@ -46,7 +46,7 @@ jobs:
       # 由于我们在 Config/IPQ60XX-WIFI-YES.txt 里已经用 # 注释掉了除雅典娜外的所有设备，
       # 所以即便矩阵包含多项，系统也只会为你精准打磨那一台机器的固件，拒绝算力浪费。
       matrix:
-        CONFIG: [IPQ60XX-WIFI-YES, IPQ60XX-WIFI-NO, IPQ807X-WIFI-YES, IPQ807X-WIFI-NO]
+        CONFIG: [IPQ60XX-WIFI-YES]
         SOURCE: [VIKINGYFY/immortalwrt]
         BRANCH: [main]
 
