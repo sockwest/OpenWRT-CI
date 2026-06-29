@@ -185,25 +185,23 @@ fi
 # 专属底层重构：强制接管并编译 daed (高通平台定制方案)
 # =================================================================
 
-# 1. 精准拔除官方 feeds 中的残留组件，彻底消除“真假美猴王”依赖冲突隐患
-rm -rf ../feeds/packages/net/dae
-rm -rf ../feeds/packages/net/daed
-rm -rf ../feeds/luci/applications/luci-app-dae
-rm -rf ../feeds/luci/applications/luci-app-daed
+# 1. 精准拔除官方 feeds 中的残留组件，防冲突
+rm -rf ../feeds/packages/net/dae*
+rm -rf ../feeds/luci/applications/luci-app-dae*
 
-# 2. 拉取兼容性极高的 kix 测试分支，直接注入本地 package 目录 (享有最高编译优先级)
+# 2. 拉取兼容性极高的 kix 测试分支，直接注入本地 package 目录
 git clone --depth=1 --single-branch --branch kix https://github.com/QiuSimons/luci-app-daed.git package/luci-app-daed
 
-# 3. 针对高通平台与构建环境的底层 Makefile 魔改修复
+# 3. 针对高通平台的底层 Makefile 魔改修复
 if [ -d "package/luci-app-daed" ]; then
-    # 解除 pnpm 锁定限制，防止前端 UI 依赖拉取失败
+    # 解除 pnpm 锁定限制，防止前端 UI 依赖拉取超时失败
     sed -i 's/pnpm install ; \\/pnpm install --no-frozen-lockfile ; \\/g' package/luci-app-daed/daed/Makefile
     
-    # 替换官方 quic-go 库为 olicesx 修复版，解决高通架构编译报错
+    # 替换官方 quic-go 库，解决高通 (IPQ60XX) 架构交叉编译报错的致命问题
     sed -i 's|github.com/daeuniverse/quic-go|github.com/olicesx/quic-go|g' package/luci-app-daed/daed/Makefile
     
-    # 修复启动脚本参数，确保开机时服务能正确自启并被 Web 界面接管
+    # 修复启动脚本参数，确保开机自启
     sed -i 's|/run/i\\  procd_set_param|/procd_set_param command/i \\\tprocd_set_param|g' package/luci-app-daed/luci-app-daed/root/etc/init.d/luci_daed
     
-    echo "daed local override and patches applied successfully!"
+    echo "daed local override applied successfully!"
 fi
