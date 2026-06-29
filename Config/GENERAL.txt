@@ -1,43 +1,56 @@
 # =================================================================
-# 京东云雅典娜 (AX6600) 专属精简编译配置 (最终版)
+# 京东云雅典娜 (AX6600) 专属精简编译配置 (最终对齐版)
 # 核心架构: 高通硬件加速 + eBPF底层强扣分流 + 轻量化局域网共享
 # =================================================================
 
 # -----------------------------------------------------------------
-# 1. 核心代理与分流引擎 
-# 注释: 底层沙盒物理隔离与主力机精确分流
+# 1. 核心代理与底层分流引擎
 # -----------------------------------------------------------------
-# 开启 Linux 内核 eBPF 和 BTF 支持 (daed 能够挂载并劫持底层流量的先决条件)
+# [eBPF内核支持] 开启 Linux 内核 eBPF 和 BTF 支持。这是 daed 能够挂载并劫持底层流量的绝对先决条件。
 CONFIG_KERNEL_BPF_EVENTS=y
 CONFIG_KERNEL_CGROUP_BPF=y
 CONFIG_KERNEL_DEBUG_INFO=y
 CONFIG_KERNEL_DEBUG_INFO_BTF=y
 
-# 引入核心底层劫持引擎 (负责基于 MAC 地址的物理强制扣留)
+# [底层强扣引擎] 基于设备 MAC 地址的物理强制隔离。
 CONFIG_PACKAGE_luci-app-daed=y
 CONFIG_PACKAGE_daed=y
 
-# 双代理引擎容灾备份 (编译入静态文件，运行时分配不同监听端口即可互不干扰)
+# [双擎代理核心] 将两大主流代理内核编译入静态文件，作为容灾备份。
 CONFIG_PACKAGE_sing-box=y
 CONFIG_PACKAGE_xray-core=y
 
-# 保留带图形界面的备用代理方案 (不启用时仅为静态文件，不占用端口和算力)
+# [应用层代理] 备用带图形界面的全能代理方案 (HomeProxy)。
 CONFIG_PACKAGE_luci-app-homeproxy=y
 
+# [DNS 分流防污染] 强大的 DNS 转发器，智能处理国内外 DNS 解析，防止 DNS 泄漏。
+CONFIG_PACKAGE_luci-app-mosdns=y
+
+# [异地组网主方案] Tailscale (基于 WireGuard 协议)，打通多地设备，实现无缝虚拟局域网直连。
+CONFIG_PACKAGE_luci-app-tailscale=y
+
+# [异地组网备用] VNT，另一款轻量级虚拟局域网工具，互为备份。
+CONFIG_PACKAGE_luci-app-vnt=y
+
+
 # -----------------------------------------------------------------
-# 2. 局域网轻量化中转站
-# 注释: 满足设备间的无缝文件流转及打印共享，避免过度开放本机权限
+# 2. 局域网轻量化中转站与存储管理 (激活 62G eMMC 潜力)
 # -----------------------------------------------------------------
-# 启用标准的 SMB 共享协议 (苹果生态和 Windows 原生支持最好)
+# [一键分区扩容] 激活雅典娜 60G+ eMMC 闲置空间的核心工具，没有它中转站就没有物理空间。
+CONFIG_PACKAGE_luci-app-partexp=y
+
+# [轻量磁盘管理] 直观查看 eMMC 和外接 U盘 的挂载状态，支持网页端直接格式化硬盘。
+CONFIG_PACKAGE_luci-app-mini-diskmanager=y
+
+# [标准文件共享] 启用 SMB 协议，苹果生态与 Windows 原生支持最好，适合局域网视频/大物料流转。
 CONFIG_PACKAGE_luci-app-samba4=y
 
-# 补充常见物理外接存储格式的支持 (防备偶尔插拔 U盘/移动硬盘)
-# 挂载 exFAT 格式的 U盘或硬盘
-CONFIG_PACKAGE_kmod-fs-exfat=y
-# 挂载 NTFS 格式的移动硬盘
-CONFIG_PACKAGE_kmod-fs-ntfs3=y
+# [极简文件快传] 网页端文件互传工具。方便手机或其他临时设备快速上传/下载工作物料。
+CONFIG_PACKAGE_luci-app-quickfile=y
 
-# 保留必要的磁盘挂载基础组件
+# [U盘/硬盘格式支持] 挂载 exFAT 和 NTFS 格式的移动硬盘 (防备偶尔插拔)。
+CONFIG_PACKAGE_kmod-fs-exfat=y
+CONFIG_PACKAGE_kmod-fs-ntfs3=y
 CONFIG_PACKAGE_automount=y
 CONFIG_PACKAGE_blkid=y
 CONFIG_PACKAGE_lsblk=y
@@ -45,32 +58,72 @@ CONFIG_PACKAGE_kmod-usb-storage=y
 CONFIG_PACKAGE_kmod-usb-storage-extras=y
 CONFIG_PACKAGE_kmod-usb-storage-uas=y
 
-# 强制移除多余的伪 NAS 组件与高级磁盘管理 (雅典娜无需复杂磁盘阵列)
-CONFIG_PACKAGE_luci-app-mini-diskmanager=n
-CONFIG_PACKAGE_luci-app-partexp=n
+# (强制屏蔽) 移除重度 NAS 级别的高级磁盘阵列与监控组件，避免过度占用 CPU 算力。
+CONFIG_PACKAGE_luci-app-diskman=n
 CONFIG_PACKAGE_smartmontools=n
 CONFIG_PACKAGE_smartmontools-drivedb=n
 CONFIG_PACKAGE_kmod-fs-ksmbd=n
 CONFIG_PACKAGE_kmod-fs-btrfs=n
 
-# -----------------------------------------------------------------
-# 3. 实用运维与界面增强
-# -----------------------------------------------------------------
-# 网页端终端 (折腾底层协议时，直接浏览器内敲命令，极其方便)
-CONFIG_PACKAGE_luci-app-ttyd=y
-# 高颜值交互界面 (目前体验最现代化的 OpenWrt 主题)
-CONFIG_PACKAGE_luci-theme-argon=y
-# 定时重启 (设定凌晨低谷期自动重启，作为长期运行的兜底防爆策略)
-CONFIG_PACKAGE_luci-app-timedreboot=y
-# 网络带宽监视器 (按设备的 MAC 地址直观统计流量，排查异常跑流必备)
-CONFIG_PACKAGE_luci-app-nlbwmon=y
-# 内网极限测速神器 (精准排查局域网物理带宽瓶颈)
-CONFIG_PACKAGE_iperf3=y
 
 # -----------------------------------------------------------------
-# 4. 彻底剔除无用外设与杂项 (极限瘦身，强制覆盖上游默认配置)
+# 3. 核心主题 (UI 界面全开，方便对比测试)
 # -----------------------------------------------------------------
-# 移除所有 4G/5G 物联网模块驱动
+# [现代化主题] Argon，目前最主流、稳定且高颜值的默认首选。
+CONFIG_PACKAGE_luci-theme-argon=y
+# [扁平极简主题] Shadcn，非常轻量。
+CONFIG_PACKAGE_luci-theme-shadcn=y
+# [多彩动感主题] Aurora 及其独立控制面板。
+CONFIG_PACKAGE_luci-theme-aurora=y
+CONFIG_PACKAGE_luci-app-aurora-config=y
+# [多功能动态主题] Kucat 及其独立控制面板。
+CONFIG_PACKAGE_luci-theme-kucat=y
+CONFIG_PACKAGE_luci-app-kucat-config=y
+
+
+# -----------------------------------------------------------------
+# 4. 实用运维与排障工具 (日常维护必备)
+# -----------------------------------------------------------------
+# [网页端终端] TTYD。无需打开电脑 SSH 软件，直接在浏览器内敲命令行，折腾底层协议极其方便。
+CONFIG_PACKAGE_luci-app-ttyd=y
+
+# [定时重启] 设定凌晨低谷期自动重启，作为长期运行清理内存的兜底防爆策略。
+CONFIG_PACKAGE_luci-app-autoreboot=y
+
+# [MAC 流量统计] Nlbwmon。直观按局域网设备统计流量，排查某台虚拟机或新设备是否异常跑流。
+CONFIG_PACKAGE_luci-app-nlbwmon=y
+
+# [外网测速神器] Netspeedtest。直接测试物理宽带极限，排查 CPE 网络波动与节点卡顿的利器。
+CONFIG_PACKAGE_luci-app-netspeedtest=y
+
+# [内网极限测速] iperf3。精准排查局域网内的物理带宽瓶颈 (比如网线老化、网卡降速)。
+CONFIG_PACKAGE_iperf3=y
+
+# [动态域名解析] DDNS-GO。配合 IPv6，让你出门在外也能远程登录家里主路由后台管理 dae 规则。
+CONFIG_PACKAGE_luci-app-ddns-go=y
+
+# [设备时间控制] 管控特定设备的连网时段。
+CONFIG_PACKAGE_luci-app-timecontrol=y
+
+# 允许局域网内的设备（如电脑、游戏主机、NAS）自动向路由器请求打开特定的端口
+CONFIG_PACKAGE_luci-app-upnp=y
+
+
+
+
+# -----------------------------------------------------------------
+# 5. 彻底剔除无用外设与杂项 (极限瘦身断舍离)
+# -----------------------------------------------------------------
+
+# [远程唤醒集合] 用于远程唤醒局域网内休眠的工作主机 (包含普通版和增强版)。
+CONFIG_PACKAGE_luci-app-timewol=n
+CONFIG_PACKAGE_luci-app-wolplus=n
+
+# [集客AC控制器] 留作备用，用于管理未来可能接入的 AP 面板。
+CONFIG_PACKAGE_luci-app-gecoosac=n
+
+
+# 移除所有 4G/5G 物联网模块驱动 (已交由外部 5G CPE 负责)
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=n
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-fibocom=n
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-quectel=n
@@ -80,7 +133,7 @@ CONFIG_PACKAGE_kmod-usb-net-ipheth=n
 CONFIG_PACKAGE_kmod-usb-net-rndis=n
 CONFIG_PACKAGE_libimobiledevice=n
 CONFIG_PACKAGE_usbmuxd=n
-# 移除各种外接千兆/百兆 USB 网卡驱动 (雅典娜自带 2.5G，无需外接)
+# 移除各种外接千兆/百兆 USB 网卡驱动 (雅典娜自带 2.5G)
 CONFIG_PACKAGE_kmod-usb-net-rtl8150=n
 CONFIG_PACKAGE_kmod-usb-net-rtl8152=n
 CONFIG_PACKAGE_kmod-usb-net-asix=n
@@ -91,17 +144,17 @@ CONFIG_PACKAGE_nvme-cli=n
 CONFIG_PACKAGE_libnvme=n
 CONFIG_PACKAGE_kmod-ata-ahci=n
 CONFIG_PACKAGE_kmod-ata-core=n
-# 移除音频输出驱动与测分工具
+# 移除音频输出驱动与跑分工具
 CONFIG_PACKAGE_kmod-sound-core=n
 CONFIG_PACKAGE_kmod-usb-audio=n
 CONFIG_PACKAGE_coremark=n
-# 移除集客 AC 面板控制器及传统老旧 VPN 组件
-CONFIG_PACKAGE_luci-app-gecoosac=n
+# 移除传统老旧 VPN 固件升级组件
 CONFIG_PACKAGE_kmod-ovpn-backports=n
 CONFIG_PACKAGE_luci-app-attendedsysupgrade=n
 
+
 # -----------------------------------------------------------------
-# 5. 系统底层基础框架与高通加速网络依赖 (切勿修改)
+# 6. 系统底层基础框架与防火墙依赖 (保持上游框架，切勿修改)
 # -----------------------------------------------------------------
 CONFIG_CCACHE=y
 CONFIG_DEVEL=y
@@ -151,10 +204,11 @@ CONFIG_PACKAGE_kmod-usb-ohci=y
 CONFIG_PACKAGE_kmod-usb-uhci=y
 CONFIG_PACKAGE_kmod-usb-xhci=y
 
+
 # -----------------------------------------------------------------
-# 6. 强制放开固件打包体积限制 (防止大体积插件撑爆默认的 Image 限制)
+# 7. 强制放开固件打包体积限制 (防止大体积内核撑爆默认空间)
 # -----------------------------------------------------------------
-# 设定根文件系统打包空间为 1024MB (配合你刷入的大容量 GPT 分区)
+# 设定根文件系统打包空间为 1024MB (配合刷入的大容量 GPT 分区)
 CONFIG_TARGET_ROOTFS_PARTSIZE=1024
 
 # eMMC 大存储设备建议同时生成 ext4 格式的固件包以提高稳定性和读写效率
