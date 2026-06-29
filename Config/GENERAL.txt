@@ -12,9 +12,10 @@ CONFIG_KERNEL_CGROUP_BPF=y
 CONFIG_KERNEL_DEBUG_INFO=y
 CONFIG_KERNEL_DEBUG_INFO_BTF=y
 
-# [底层强扣引擎] 基于设备 MAC 地址的物理强制隔离。
+# [底层强扣引擎] 基于设备 MAC 地址的物理强制隔离
 CONFIG_PACKAGE_luci-app-daed=y
 CONFIG_PACKAGE_daed=y
+CONFIG_PACKAGE_dae=y
 
 # [双擎代理核心] 将两大主流代理内核编译入静态文件，作为容灾备份。
 CONFIG_PACKAGE_sing-box=y
