@@ -65,7 +65,7 @@ UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 
 # 【核心底层代理】引入 daed 
-UPDATE_PACKAGE "daed" "QiuSimons/luci-app-daed" "master"
+# UPDATE_PACKAGE "daed" "QiuSimons/luci-app-daed" "master"
 
 # (已注释) 移除我们不需要的老旧、冗余代理方案，保持内核纯净
 # UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
