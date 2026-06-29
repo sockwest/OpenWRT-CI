@@ -45,56 +45,83 @@ UPDATE_PACKAGE() {
 }
 
 # -----------------------------------------------------------------
-# 1. 核心主题与 UI 组件 (拉取你想保留的高颜值后台)
+# 1. 核心主题与 UI 组件 (全部开启，方便对比测试后筛选)
 # -----------------------------------------------------------------
+# 【现代化主题】目前最主流、最稳定的高颜值主题
 UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-25.12"
-# (已注释) 移除其他不需要的冗余主题，加快编译速度
-# UPDATE_PACKAGE "shadcn" "eamonxg/luci-theme-shadcn" "main"
-# UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
-# UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
-# UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
-# UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
+# 【扁平化极简主题】基于 shadcn UI 设计风格的轻量主题
+UPDATE_PACKAGE "shadcn" "eamonxg/luci-theme-shadcn" "main"
+# 【多彩动感主题】Aurora 主题及其控制面板，支持丰富的自定义设置
+UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
+UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
+# 【多功能动态主题】Kucat 主题及其控制面板，带有一些特效和高度自定义功能
+UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
+UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
 
 # -----------------------------------------------------------------
 # 2. 核心代理与分流网络组件 (业务架构的基石)
 # -----------------------------------------------------------------
-# 备用带界面的全能代理方案
+# 【应用层代理】备用带界面的全能代理方案 (HomeProxy)
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 
-# 【新增核心】引入 daed (基于 eBPF 的底层强扣引擎)
-UPDATE_PACKAGE "daed" "QiuSimons/openwrt-dae" "master" "pkg"
+# 【核心底层代理】引入 daed 
+UPDATE_PACKAGE "daed" "QiuSimons/luci-app-daed" "master" "pkg"
 
-# (已注释) 移除我们不需要的老旧、冗余代理方案
+# (已注释) 移除我们不需要的老旧、冗余代理方案，保持内核纯净
 # UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
 # UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
 # UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
 # UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
 # UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
-# UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
+
+# 【异地组网】引入 Tailscale (基于 WireGuard 协议的虚拟局域网，实现跨地域设备无缝直连)
+UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 
 # -----------------------------------------------------------------
-# 3. 实用工具包 (仅保留需要的)
+# 3. 实用工具包 (按需精简与核心能力补齐)
 # -----------------------------------------------------------------
-# 保留网络带宽监控工具
-UPDATE_PACKAGE "nlbwmon" "sbwml/luci-app-nlbwmon" "master"
+# 【恢复拉取】动态域名穿透：配合 IPv6 方便在外远程管理主路由和 dae 规则
+UPDATE_PACKAGE "ddns-go" "sirpdboy/luci-app-ddns-go" "main"
 
-# (已注释) 强制移除所有不需要的伪 NAS、磁盘管理、下载工具
-# UPDATE_PACKAGE "ddns-go" "sirpdboy/luci-app-ddns-go" "main"
+# (已注释) 冲突的高级磁盘管理，被下方的 mini-diskmanager 替代
 # UPDATE_PACKAGE "diskman" "sbwml/luci-app-diskman" "main"
-# UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
+
+# 【恢复拉取】轻量磁盘管理：直观查看和格式化雅典娜 62G eMMC 和外接 U 盘
+UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
+
+# (已注释) 虚拟局域网工具，已有 tailscale 暂不需要
 # UPDATE_PACKAGE "easytier" "EasyTier/luci-app-easytier" "main"
-# UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
-# UPDATE_PACKAGE "netspeedtest" "sirpdboy/netspeedtest" "main" "" "homebox ookla-speedtest"
+
+# 【DNS 分流与防污染】引入 MosDNS (强大的 DNS 转发器，智能处理国内外 DNS 解析，防止 DNS 泄漏)
+UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
+
+# 【恢复拉取】内网与物理宽带测速：排查 CPE 网络波动与节点卡顿的排障利器
+UPDATE_PACKAGE "netspeedtest" "sirpdboy/netspeedtest" "main" "" "homebox ookla-speedtest"
+
+# (已注释) 网络向导与列表管理，用不上
 # UPDATE_PACKAGE "netwizard" "sirpdboy/luci-app-netwizard" "main"
 # UPDATE_PACKAGE "openlist2" "sbwml/luci-app-openlist2" "main"
-# UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
-# UPDATE_PACKAGE "qbittorrent" "sbwml/luci-app-qbittorrent" "master" "" "qt6base qt6tools rblibtorrent"
-# UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
-# UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
-# UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
-# UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus"
-# UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
 
+# 【恢复拉取】分区扩容：一键挂载雅典娜剩余的 60G+ eMMC 空间，激活存储中转站的前提
+UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
+
+# (已注释) 拒绝重度 NAS 下载组件，极其占用内存和算力
+# UPDATE_PACKAGE "qbittorrent" "sbwml/luci-app-qbittorrent" "master" "" "qt6base qt6tools rblibtorrent"
+
+# (已注释) 拒绝 USB 拨号，网络已交由 5G CPE 物理直连
+# UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
+
+# 【恢复拉取】极简文件快传：方便网页端跨设备临时拉取或上传工作物料
+UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
+
+# 【定时控制】引入时间控制插件 (可设置定时任务，或用来管控特定设备的连网时段)
+UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
+
+# 【私有扩展包】拉取你个人的专属定制包 (包含 gecoosac 集客AC控制器、timewol 定时唤醒及 wolplus 高级唤醒)
+# UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus"
+
+# 【异地组网备用】引入 VNT (另一款轻量级虚拟局域网工具，可与 Tailscale 互为备用打通内外网)
+UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
 
 # -----------------------------------------------------------------
 # UPDATE_VERSION 函数定义 (自动获取并同步最新底层内核版本号)
