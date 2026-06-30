@@ -61,17 +61,10 @@ UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
 # -----------------------------------------------------------------
 # 2. 核心代理与分流网络组件 (业务架构的基石)
 # -----------------------------------------------------------------
-# 【应用层代理】备用带界面的全能代理方案 (HomeProxy)
+# 【主线代理】拥抱极其稳健的全能方案 (HomeProxy)。走 TUN 网卡模式，完全不依赖严苛的内核 eBPF 特性，100% 保证跨架构编译通过。
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 
-# 注意：这里坚决不写 daed 的 UPDATE_PACKAGE，让底部的强覆盖逻辑接管！！！
 
-# (已注释) 移除我们不需要的老旧、冗余代理方案，保持内核纯净
-# UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
-# UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
-# UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
-# UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
-# UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
 
 # 【异地组网】引入 Tailscale (基于 WireGuard 协议的虚拟局域网，实现跨地域设备无缝直连)
 UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
@@ -79,17 +72,11 @@ UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 # -----------------------------------------------------------------
 # 3. 实用工具包 (按需精简与核心能力补齐)
 # -----------------------------------------------------------------
-# 【恢复拉取】动态域名穿透：配合 IPv6 方便在外远程管理主路由和 dae 规则
+# 【恢复拉取】动态域名穿透：配合 IPv6 方便在外远程管理主路由后台
 UPDATE_PACKAGE "ddns-go" "sirpdboy/luci-app-ddns-go" "main"
-
-# (已注释) 冲突的高级磁盘管理，被下方的 mini-diskmanager 替代
-# UPDATE_PACKAGE "diskman" "sbwml/luci-app-diskman" "main"
 
 # 【恢复拉取】轻量磁盘管理：直观查看和格式化雅典娜 62G eMMC 和外接 U 盘
 UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
-
-# (已注释) 虚拟局域网工具，已有 tailscale 暂不需要
-# UPDATE_PACKAGE "easytier" "EasyTier/luci-app-easytier" "main"
 
 # 【DNS 分流与防污染】引入 MosDNS (强大的 DNS 转发器，智能处理国内外 DNS 解析，防止 DNS 泄漏)
 UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
@@ -97,27 +84,14 @@ UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
 # 【注释屏蔽】因上游 Python3 依赖重构导致编译报错 (python3-pkg-resources)，为保全局稳定，果断放弃此测速插件
 # UPDATE_PACKAGE "netspeedtest" "sirpdboy/netspeedtest" "main" "" "homebox ookla-speedtest"
 
-# (已注释) 网络向导与列表管理，用不上
-# UPDATE_PACKAGE "netwizard" "sirpdboy/luci-app-netwizard" "main"
-# UPDATE_PACKAGE "openlist2" "sbwml/luci-app-openlist2" "main"
-
 # 【恢复拉取】分区扩容：一键挂载雅典娜剩余的 60G+ eMMC 空间，激活存储中转站的前提
 UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
-
-# (已注释) 拒绝重度 NAS 下载组件，极其占用内存和算力
-# UPDATE_PACKAGE "qbittorrent" "sbwml/luci-app-qbittorrent" "master" "" "qt6base qt6tools rblibtorrent"
-
-# (已注释) 拒绝 USB 拨号，网络已交由 5G CPE 物理直连
-# UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
 
 # 【恢复拉取】极简文件快传：方便网页端跨设备临时拉取或上传工作物料
 UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 
 # 【定时控制】引入时间控制插件 (可设置定时任务，或用来管控特定设备的连网时段)
 UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
-
-# 【私有扩展包】拉取个人的专属定制包 (包含 gecoosac 集客AC控制器、timewol 定时唤醒及 wolplus 高级唤醒)
-# UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus"
 
 # 【异地组网备用】引入 VNT (另一款轻量级虚拟局域网工具，可与 Tailscale 互为备用打通内外网)
 UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
@@ -166,47 +140,13 @@ UPDATE_VERSION() {
 }
 
 # -----------------------------------------------------------------
-# 4. 强制同步最新双擎内核版本
+# 4. 强制同步最新双擎内核版本 (双保险容灾引擎)
 # -----------------------------------------------------------------
+# 确保 HomeProxy 能随时调用最新版的底层二进制文件，应对特征码封锁
 UPDATE_VERSION "sing-box"
 UPDATE_VERSION "xray-core"
-
-
 
 #引入私有扩展脚本
 if [ -f "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh" ]; then
 	source "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh"
-fi
-
-
-
-# =================================================================
-# 专属底层重构：强制接管并编译 daed (高通平台定制与全方位防爆方案)
-# =================================================================
-
-# 1. 精准拔除官方 feeds 中的残留组件，彻底防止“真假美猴王”依赖冲突
-rm -rf ../feeds/packages/net/dae*
-rm -rf ../feeds/luci/applications/luci-app-dae*
-
-# 2. 拉取兼容性极高的 kix 测试分支，直接注入本地 package 目录 (拥有最高优先编译权)
-git clone --depth=1 --single-branch --branch kix https://github.com/QiuSimons/luci-app-daed.git package/luci-app-daed
-
-# 3. 针对高通平台的底层 Makefile 终极魔改修复矩阵
-if [ -d "package/luci-app-daed" ]; then
-    # 【编译期修复】解除 pnpm 锁定限制，防止前端 UI 依赖因 Hash 不匹配拉取失败
-    sed -i 's/pnpm install ; \\/pnpm install --no-frozen-lockfile ; \\/g' package/luci-app-daed/daed/Makefile
-    
-    # 【编译期修复】替换官方 quic-go 库，解决高通 (IPQ60XX) 架构交叉编译报错的致命问题
-    sed -i 's|github.com/daeuniverse/quic-go|github.com/olicesx/quic-go|g' package/luci-app-daed/daed/Makefile
-    
-    # 【运行期修复】修复启动脚本参数，确保刷机后守护进程能随系统开机自启
-    sed -i 's|/run/i\\  procd_set_param|/procd_set_param command/i \\\tprocd_set_param|g' package/luci-app-daed/luci-app-daed/root/etc/init.d/luci_daed
-    
-    # 【编译期修复】完美替代 001-fix_ccache.patch，强制该组件绕过编译缓存，防 Hash 损坏
-    sed -i 's/PKG_BUILD_FLAGS:=/PKG_BUILD_FLAGS:=no-ccache /g' package/luci-app-daed/daed/Makefile
-    
-    # 【编译期致命修复】强制抹除 vmlinux-btf 幽灵依赖，防止 Makefile 寻址失败引发连锁崩溃
-    sed -i 's/+DAED_USE_VMLINUX_BTF:vmlinux-btf//g' package/luci-app-daed/daed/Makefile
-    
-    echo "daed local override and patches applied successfully!"
 fi
