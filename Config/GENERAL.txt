@@ -1,29 +1,17 @@
 # =================================================================
 # 京东云雅典娜 (AX6600) 专属精简编译配置 (最终对齐版)
-# 核心架构: 高通硬件加速 + eBPF底层强扣分流 + 轻量化局域网共享
+# 核心架构: 高通硬件加速 + 极简通用分流 (HomeProxy) + 轻量化局域网共享
 # =================================================================
 
 # -----------------------------------------------------------------
-# 1. 核心代理与底层分流引擎
+# 1. 核心代理与分流引擎 (HomeProxy 纯净架构)
 # -----------------------------------------------------------------
-# [eBPF内核支持] 开启 Linux 内核 eBPF 和 BTF 支持。这是 daed 能够挂载并劫持底层流量的绝对先决条件。
-CONFIG_KERNEL_BPF_EVENTS=y
-CONFIG_KERNEL_CGROUP_BPF=y
-# CONFIG_KERNEL_DEBUG_INFO=y
-CONFIG_KERNEL_DEBUG_INFO_BTF=y
-# [底层强扣引擎] 基于设备 MAC 地址的物理强制隔离
-CONFIG_PACKAGE_luci-app-daed=y
-CONFIG_PACKAGE_daed=y
-CONFIG_PACKAGE_dae=y
-# 【新增修复】明确宣告使用内核原生 BTF，配合 Packages.sh 的 sed 魔改，彻底消除依赖死锁
-CONFIG_DAED_USE_KERNEL_BTF=y
+# [主线代理] 极其稳健的全能方案 (HomeProxy)。走 TUN 网卡模式，完全不依赖严苛的内核 eBPF 特性，100% 保证跨架构编译通过。
+CONFIG_PACKAGE_luci-app-homeproxy=y
 
-# [双擎代理核心] 将两大主流代理内核编译入静态文件，作为容灾备份。
+# [双擎代理核心] 将两大主流代理内核编译入静态文件。HomeProxy 默认调用 Sing-box，Xray 作为极限防封锁容灾备份引擎。
 CONFIG_PACKAGE_sing-box=y
 CONFIG_PACKAGE_xray-core=y
-
-# [应用层代理] 备用带图形界面的全能代理方案 (HomeProxy)。
-CONFIG_PACKAGE_luci-app-homeproxy=y
 
 # [DNS 分流防污染] 强大的 DNS 转发器，智能处理国内外 DNS 解析，防止 DNS 泄漏。
 CONFIG_PACKAGE_luci-app-mosdns=y
@@ -95,31 +83,25 @@ CONFIG_PACKAGE_luci-app-autoreboot=y
 # [MAC 流量统计] Nlbwmon。直观按局域网设备统计流量，排查某台虚拟机或新设备是否异常跑流。
 CONFIG_PACKAGE_luci-app-nlbwmon=y
 
-# [外网测速神器] Netspeedtest。直接测试物理宽带极限，排查 CPE 网络波动与节点卡顿的利器。
+# [外网测速神器] Netspeedtest。直接测试物理宽带极限，排查网络波动与节点卡顿的利器。
 # 【警告】因底层 Python3 依赖冲突，当前版本已在 GENERAL 和 Packages 中强制注释屏蔽，以保全量编译通过
 # CONFIG_PACKAGE_luci-app-netspeedtest=y
 
 # [内网极限测速] iperf3。精准排查局域网内的物理带宽瓶颈 (比如网线老化、网卡降速)。
 CONFIG_PACKAGE_iperf3=y
 
-# [动态域名解析] DDNS-GO。配合 IPv6，让你出门在外也能远程登录家里主路由后台管理 dae 规则。
+# [动态域名解析] DDNS-GO。配合 IPv6，让你出门在外也能远程登录家里主路由后台。
 CONFIG_PACKAGE_luci-app-ddns-go=y
 
 # [设备时间控制] 管控特定设备的连网时段。
 CONFIG_PACKAGE_luci-app-timecontrol=y
 
-# [远程唤醒集合] 用于远程唤醒局域网内休眠的工作主机 (包含普通版和增强版)。
-CONFIG_PACKAGE_luci-app-timewol=n
-CONFIG_PACKAGE_luci-app-wolplus=n
-
-# [集客AC控制器] 留作备用，用于管理未来可能接入的 AP 面板。
-CONFIG_PACKAGE_luci-app-gecoosac=n
 
 
 # -----------------------------------------------------------------
 # 5. 彻底剔除无用外设与杂项 (极限瘦身断舍离)
 # -----------------------------------------------------------------
-# 移除所有 4G/5G 物联网模块驱动 (已交由外部 5G CPE 负责)
+# 移除所有 4G/5G 物联网模块驱动 (网络交由外部物理直连)
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=n
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-fibocom=n
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-quectel=n
