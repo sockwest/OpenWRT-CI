@@ -7,10 +7,10 @@
 # 1. 核心代理与底层分流引擎
 # -----------------------------------------------------------------
 # [eBPF内核支持] 开启 Linux 内核 eBPF 和 BTF 支持。这是 daed 能够挂载并劫持底层流量的绝对先决条件。
-CONFIG_KERNEL_BPF_EVENTS=y
-CONFIG_KERNEL_CGROUP_BPF=y
-CONFIG_KERNEL_DEBUG_INFO=y
-CONFIG_KERNEL_DEBUG_INFO_BTF=y
+# CONFIG_KERNEL_BPF_EVENTS=y
+# CONFIG_KERNEL_CGROUP_BPF=y
+# CONFIG_KERNEL_DEBUG_INFO=y
+# CONFIG_KERNEL_DEBUG_INFO_BTF=y
 
 # [底层强扣引擎] 基于设备 MAC 地址的物理强制隔离
 CONFIG_PACKAGE_luci-app-daed=y
