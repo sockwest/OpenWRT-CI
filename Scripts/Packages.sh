@@ -66,23 +66,14 @@ UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 
 
 
-# 【异地组网】引入 Tailscale (基于 WireGuard 协议的虚拟局域网，实现跨地域设备无缝直连)
-# UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
-
 # -----------------------------------------------------------------
 # 3. 实用工具包 (按需精简与核心能力补齐)
 # -----------------------------------------------------------------
-# 【恢复拉取】动态域名穿透：配合 IPv6 方便在外远程管理主路由后台
-UPDATE_PACKAGE "ddns-go" "sirpdboy/luci-app-ddns-go" "main"
-
 # 【恢复拉取】轻量磁盘管理：直观查看和格式化雅典娜 62G eMMC 和外接 U 盘
 UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
 
 # 【DNS 分流与防污染】引入 MosDNS (强大的 DNS 转发器，智能处理国内外 DNS 解析，防止 DNS 泄漏)
 UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
-
-# 【注释屏蔽】因上游 Python3 依赖重构导致编译报错 (python3-pkg-resources)，为保全局稳定，果断放弃此测速插件
-# UPDATE_PACKAGE "netspeedtest" "sirpdboy/netspeedtest" "main" "" "homebox ookla-speedtest"
 
 # 【恢复拉取】分区扩容：一键挂载雅典娜剩余的 60G+ eMMC 空间，激活存储中转站的前提
 UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
