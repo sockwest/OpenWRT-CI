@@ -48,7 +48,7 @@ jobs:
       matrix:
         CONFIG: [IPQ60XX-WIFI-YES]
         SOURCE: [VIKINGYFY/immortalwrt]
-        BRANCH: [main]
+        BRANCH: [openwrt-23.05]
 
     # 调用公用的核心编译流程文件 (这是真正干活的脚本，负责拉取源码、应用补丁和执行 make 编译)
     uses: ./.github/workflows/WRT-CORE.yml
