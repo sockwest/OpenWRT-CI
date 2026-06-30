@@ -67,7 +67,7 @@ UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 
 
 # 【异地组网】引入 Tailscale (基于 WireGuard 协议的虚拟局域网，实现跨地域设备无缝直连)
-UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
+# UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 
 # -----------------------------------------------------------------
 # 3. 实用工具包 (按需精简与核心能力补齐)
