@@ -54,18 +54,7 @@ if [ -d *"luci-app-mini-diskmanager"* ]; then
 	cd $PKG_PATH && echo "mini-diskmanager has been fixed!"
 fi
 
-# [文件快传归类] 将 Quickfile 从默认的系统/服务菜单移到更合理的 NAS 菜单下
-# 逻辑：修改 Quickfile 的原生 JSON 菜单注册文件，将其父节点强行指定为 admin/nas。
-# 结果：编译后，"文件管理" 将会和 Samba4 一起整整齐齐地呆在左侧的 NAS 展开项里。
-if [ -d *"luci-app-quickfile"* ]; then
-	echo " " && cd ./luci-app-quickfile/
 
-	# 暴力搜索菜单 JSON 并将其路径中的 system 或 services 替换为 nas
-	sed -i 's/"admin\/system\//"admin\/nas\//g' $(find ./root/usr/share/luci/menu.d/ -type f -name "*.json" 2>/dev/null)
-	sed -i 's/"admin\/services\//"admin\/nas\//g' $(find ./root/usr/share/luci/menu.d/ -type f -name "*.json" 2>/dev/null)
-
-	cd $PKG_PATH && echo "quickfile has been moved to NAS!"
-fi
 
 # -----------------------------------------------------------------
 # 3. 核心底层依赖编译 Bug 修复 (防报错兜底)
