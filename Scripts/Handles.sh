@@ -8,7 +8,7 @@ PKG_PATH="$GITHUB_WORKSPACE/wrt/package/"
 # 1. 预置 HomeProxy 核心路由规则字典 (极速启动优化)
 # -----------------------------------------------------------------
 # 逻辑：在编译期提前拉取 Loyalsoldier 的最新 Surge 格式规则库 (包含 CN-IP, GFW 列表等)。
-# 好处：刷机后 HomeProxy 无需在线更新规则即可瞬间启动，避免因网络问题导致规则下载失败。
+# 优势：刷机后 HomeProxy 无需在线更新规则即可瞬间启动，避免因刚刷完机网络环境不佳导致规则下载失败。
 # 注意：这只是“数据字典”，绝对不会影响你在 UI 后台配置的“MAC 强扣”和“默认直连”逻辑。
 if [ -d *"homeproxy"* ]; then
 	echo " "
@@ -16,55 +16,36 @@ if [ -d *"homeproxy"* ]; then
 	HP_RULE="surge"
 	HP_PATH="homeproxy/root/etc/homeproxy"
 
-	# 清空默认的旧规则
+	# 清空默认的旧规则，准备注入最新鲜的规则
 	rm -rf ./$HP_PATH/resources/*
 
-	# 拉取最新规则库
+	# 从 GitHub 拉取最新规则库 (只拉取最近一次 commit 以加快打包速度)
 	git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULE/
 	cd ./$HP_RULE/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
 
-	# 生成版本号标识文件
+	# 生成版本号标识文件，方便在路由器后台直观查看规则版本
 	echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
 	
-	# 提取并转换 IP 与 域名 规则
+	# 提取并转换 IP 与 域名 规则 (适配 HomeProxy 的读取格式)
 	awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
 	sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
 	
-	# 将处理好的纯净版规则移动到 HomeProxy 资源目录中打包
+	# 将处理好的纯净版规则移动到 HomeProxy 准备打包的资源目录中
 	mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATH/resources/
 
+	# 清理临时下载的规则源码，保持编译环境绝对整洁
 	cd .. && rm -rf ./$HP_RULE/
 
 	cd $PKG_PATH && echo "homeproxy data has been successfully pre-loaded!"
 fi
 
 # -----------------------------------------------------------------
-# 2. UI 主题深度定制与修复
+# 2. 插件菜单归类与体验优化
 # -----------------------------------------------------------------
 
-# [Argon 主题优化] 修改默认登录界面的主色调和毛玻璃透明度，使其更具高级感
-if [ -d *"luci-theme-argon"* ]; then
-	echo " " && cd ./luci-theme-argon/
-
-	sed -i "s/primary '.*'/primary '#31a1a1'/; s/'0.2'/'0.5'/; s/'none'/'bing'/; s/'600'/'normal'/" ./luci-app-argon-config/root/etc/config/argon
-
-	cd $PKG_PATH && echo "theme-argon has been fixed!"
-fi
-
-# [Aurora 主题优化] 将侧边栏菜单样式强制改为下拉式 (dropdown)，提升空间利用率
-if [ -d *"luci-app-aurora-config"* ]; then
-	echo " " && cd ./luci-app-aurora-config/
-
-	sed -i "s/nav_type '.*'/nav_type 'dropdown'/g" $(find ./root/usr/share/aurora/ -type f -name "*.template")
-
-	cd $PKG_PATH && echo "theme-aurora has been fixed!"
-fi
-
-# -----------------------------------------------------------------
-# 3. 插件菜单归类与编译 Bug 修复
-# -----------------------------------------------------------------
-
-# [磁盘管理归类] 将 mini-diskmanager 从杂乱的 services 菜单移到更合理的 system 菜单下
+# [磁盘管理归类] 让后台菜单逻辑更符合直觉
+# 逻辑：原版 mini-diskmanager 默认挂在“服务(Services)”菜单下。
+# 调整：将其强行移动到“系统(System)”菜单下。后续你去挂载或格式化那 62G eMMC 空间时找起来会更顺手。
 if [ -d *"luci-app-mini-diskmanager"* ]; then
 	echo " " && cd ./luci-app-mini-diskmanager/
 
@@ -73,7 +54,25 @@ if [ -d *"luci-app-mini-diskmanager"* ]; then
 	cd $PKG_PATH && echo "mini-diskmanager has been fixed!"
 fi
 
-# [TailScale 编译修复] 移除 Makefile 中的 /files 冲突声明，防止打包报错
+# [文件快传归类] 将 Quickfile 从默认的系统/服务菜单移到更合理的 NAS 菜单下
+# 逻辑：修改 Quickfile 的原生 JSON 菜单注册文件，将其父节点强行指定为 admin/nas。
+# 结果：编译后，"文件管理" 将会和 Samba4 一起整整齐齐地呆在左侧的 NAS 展开项里。
+if [ -d *"luci-app-quickfile"* ]; then
+	echo " " && cd ./luci-app-quickfile/
+
+	# 暴力搜索菜单 JSON 并将其路径中的 system 或 services 替换为 nas
+	sed -i 's/"admin\/system\//"admin\/nas\//g' $(find ./root/usr/share/luci/menu.d/ -type f -name "*.json" 2>/dev/null)
+	sed -i 's/"admin\/services\//"admin\/nas\//g' $(find ./root/usr/share/luci/menu.d/ -type f -name "*.json" 2>/dev/null)
+
+	cd $PKG_PATH && echo "quickfile has been moved to NAS!"
+fi
+
+# -----------------------------------------------------------------
+# 3. 核心底层依赖编译 Bug 修复 (防报错兜底)
+# -----------------------------------------------------------------
+
+# [TailScale 编译修复] 异地组网核心组件防错机制
+# 逻辑：移除 Makefile 中的 /files 冲突声明，防止在云端 Actions 打包时因路径重叠导致整个固件编译失败。
 TS_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
 if [ -f "$TS_FILE" ]; then
 	echo " "
@@ -83,7 +82,8 @@ if [ -f "$TS_FILE" ]; then
 	cd $PKG_PATH && echo "tailscale has been fixed!"
 fi
 
-# [Rust 环境修复] 禁用强制使用 CI-LLVM，解决 GitHub Actions 编译时 Rust 语言组件报错的隐患
+# [Rust 环境修复] 现代高级网络插件的底层编译环境修复
+# 逻辑：禁用强制使用 CI-LLVM。GitHub Actions 的云端环境经常因为 Rust 语言组件的版本跨度问题导致编译中断，关闭此项可大幅提升编译成功率。
 RUST_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/rust/Makefile")
 if [ -f "$RUST_FILE" ]; then
 	echo " "
