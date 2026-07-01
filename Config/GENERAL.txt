@@ -1,22 +1,23 @@
 # =================================================================
 # 京东云雅典娜 (AX6600) 专属精简编译配置 (最终对齐版)
-# 核心架构: 高通硬件加速 + 极简通用分流 (HomeProxy) + 轻量化局域网共享
+# 核心架构: 高通硬件加速 + 极简通用分流 (HomeProxy) + 容器化生态
+# 存储优势: 彻底激活 60G+ eMMC 空间潜力
 # =================================================================
 
 # -----------------------------------------------------------------
 # 1. 核心代理与分流引擎 (HomeProxy 纯净架构)
 # -----------------------------------------------------------------
-# [主线代理] 极其稳健的全能方案 (HomeProxy)。走 TUN 网卡模式，完全不依赖严苛的内核 eBPF 特性，100% 保证跨架构编译通过。
+# [主线代理] 极其稳健的全能方案。走 TUN 网卡模式，100% 保证跨架构编译通过。
 CONFIG_PACKAGE_luci-app-homeproxy=y
 
-# [双擎代理核心] 将两大主流代理内核编译入静态文件。HomeProxy 默认调用 Sing-box，Xray 作为极限防封锁容灾备份引擎。
+# [双擎代理核心] 将两大主流代理内核编译入静态文件。Sing-box 主力，Xray 备用。
 CONFIG_PACKAGE_sing-box=y
 CONFIG_PACKAGE_xray-core=y
 
 # [DNS 分流防污染] 强大的 DNS 转发器，智能处理国内外 DNS 解析，防止 DNS 泄漏。
 CONFIG_PACKAGE_luci-app-mosdns=y
 
-# [异地组网主方案] Tailscale (基于 WireGuard 协议)，打通多地设备，实现无缝虚拟局域网直连。
+# [异地组网主方案] Tailscale (基于 WireGuard 协议)，打通多地设备，实现虚拟局域网直连。
 CONFIG_PACKAGE_luci-app-tailscale=y
 
 # [异地组网备用] VNT，另一款轻量级虚拟局域网工具，互为备份。
@@ -24,9 +25,9 @@ CONFIG_PACKAGE_luci-app-vnt=y
 
 
 # -----------------------------------------------------------------
-# 2. 局域网轻量化中转站与存储管理 (激活 62G eMMC 潜力)
+# 2. 局域网轻量化中转站与存储管理 (激活 eMMC 潜力)
 # -----------------------------------------------------------------
-# [一键分区扩容] 激活雅典娜 60G+ eMMC 闲置空间的核心工具，没有它中转站就没有物理空间。
+# [一键分区扩容] 激活雅典娜 eMMC 闲置空间的核心工具，没有它中转站就没有物理空间。
 CONFIG_PACKAGE_luci-app-partexp=y
 
 # [轻量磁盘管理] 直观查看 eMMC 和外接 U盘 的挂载状态，支持网页端直接格式化硬盘。
@@ -37,6 +38,9 @@ CONFIG_PACKAGE_luci-app-samba4=y
 
 # [极简文件快传] 网页端文件互传工具。方便手机或其他临时设备快速上传/下载工作物料。
 CONFIG_PACKAGE_luci-app-quickfile=y
+
+# [P2P/磁力下载加速] 自动映射端口，解决内网穿透，大幅提升 BT/PT 磁力下载速度与做种连通性。
+CONFIG_PACKAGE_luci-app-upnp=y
 
 # [U盘/硬盘格式支持] 挂载 exFAT 和 NTFS 格式的移动硬盘 (防备偶尔插拔)。
 CONFIG_PACKAGE_kmod-fs-exfat=y
@@ -57,7 +61,23 @@ CONFIG_PACKAGE_kmod-fs-btrfs=n
 
 
 # -----------------------------------------------------------------
-# 3. 核心主题 (UI 界面全开，方便对比测试)
+# 3. 容器化生态 (Docker) 与底层网络支持
+# -----------------------------------------------------------------
+# [容器管理面板] Dockerman。提供网页端全功能图形化界面，自动拉取底层 docker 引擎核心。
+CONFIG_PACKAGE_luci-app-dockerman=y
+
+# [虚拟以太网驱动] Docker 容器网络 (桥接模式) 的核心底层依赖，确保容器正常连网。
+CONFIG_PACKAGE_kmod-veth=y
+
+# [网桥过滤模块] 处理 Docker 容器的端口映射与防火墙规则，确保外部精准访问容器服务。
+CONFIG_PACKAGE_kmod-br-netfilter=y
+
+# [虚拟网卡模块] 高级网络路由与复杂容器网络环境常用的底层基础支持。
+CONFIG_PACKAGE_kmod-dummy=y
+
+
+# -----------------------------------------------------------------
+# 4. 核心主题 (UI 界面全开，方便对比测试)
 # -----------------------------------------------------------------
 # [现代化主题] Argon，目前最主流、稳定且高颜值的默认首选。
 CONFIG_PACKAGE_luci-theme-argon=y
@@ -72,22 +92,21 @@ CONFIG_PACKAGE_luci-app-kucat-config=y
 
 
 # -----------------------------------------------------------------
-# 4. 实用运维与排障工具 (日常维护必备)
+# 5. 实用运维与排障工具 (日常维护必备)
 # -----------------------------------------------------------------
-# [网页端终端] TTYD。无需打开电脑 SSH 软件，直接在浏览器内敲命令行，折腾底层协议极其方便。
+# [网页端终端] TTYD。无需打开电脑 SSH 软件，直接在浏览器内敲命令行，折腾极方便。
 CONFIG_PACKAGE_luci-app-ttyd=y
 
 # [定时重启] 设定凌晨低谷期自动重启，作为长期运行清理内存的兜底防爆策略。
 CONFIG_PACKAGE_luci-app-autoreboot=y
 
-# [MAC 流量统计] Nlbwmon。直观按局域网设备统计流量，排查某台虚拟机或新设备是否异常跑流。
+# [MAC 流量统计] Nlbwmon。直观按局域网设备统计流量，排查异常跑流。
 CONFIG_PACKAGE_luci-app-nlbwmon=y
 
-# [外网测速神器] Netspeedtest。直接测试物理宽带极限，排查网络波动与节点卡顿的利器。
-# 【警告】因底层 Python3 依赖冲突，当前版本已在 GENERAL 和 Packages 中强制注释屏蔽，以保全量编译通过
+# [外网测速神器] Netspeedtest。因底层 Python3 依赖冲突，当前强制注释屏蔽以保编译通过。
 # CONFIG_PACKAGE_luci-app-netspeedtest=y
 
-# [内网极限测速] iperf3。精准排查局域网内的物理带宽瓶颈 (比如网线老化、网卡降速)。
+# [内网极限测速] iperf3。精准排查局域网内的物理带宽瓶颈。
 CONFIG_PACKAGE_iperf3=y
 
 # [动态域名解析] DDNS-GO。配合 IPv6，让你出门在外也能远程登录家里主路由后台。
@@ -96,43 +115,59 @@ CONFIG_PACKAGE_luci-app-ddns-go=y
 # [设备时间控制] 管控特定设备的连网时段。
 CONFIG_PACKAGE_luci-app-timecontrol=y
 
+# [eMMC健康检测] 专用于内置 eMMC 芯片寿命损耗与坏块排查，防范系统崩溃风险。
+CONFIG_PACKAGE_mmc-utils=y
+
+# [闪存运维工具] 提供对板载闪存的低级管理，支持底层硬件级排障。
+CONFIG_PACKAGE_nand-utils=y
 
 
 # -----------------------------------------------------------------
-# 5. 彻底剔除无用外设与杂项 (极限瘦身断舍离)
+# 6. 彻底剔除无用外设与私有杂项 (极限瘦身断舍离)
 # -----------------------------------------------------------------
+# (强制屏蔽) 明确拒绝不需要的私有唤醒和 AC 管理插件，防止默认打包
+CONFIG_PACKAGE_luci-app-timewol=n
+CONFIG_PACKAGE_luci-app-wolplus=n
+CONFIG_PACKAGE_luci-app-wol=n
+CONFIG_PACKAGE_luci-app-gecoosac=n
+
 # 移除所有 4G/5G 物联网模块驱动 (网络交由外部物理直连)
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=n
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-fibocom=n
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-quectel=n
 CONFIG_PACKAGE_kmod-usb-net-sierrawireless=n
+
 # 移除所有手机 USB 共享网络通信库 (包括苹果与安卓)
 CONFIG_PACKAGE_kmod-usb-net-ipheth=n
 CONFIG_PACKAGE_kmod-usb-net-rndis=n
 CONFIG_PACKAGE_libimobiledevice=n
 CONFIG_PACKAGE_usbmuxd=n
+
 # 移除各种外接千兆/百兆 USB 网卡驱动 (雅典娜自带 2.5G)
 CONFIG_PACKAGE_kmod-usb-net-rtl8150=n
 CONFIG_PACKAGE_kmod-usb-net-rtl8152=n
 CONFIG_PACKAGE_kmod-usb-net-asix=n
 CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=n
+
 # 移除 M.2 NVMe 与 SATA 硬盘物理层驱动 (硬件不支持，留着纯属冗余)
 CONFIG_PACKAGE_kmod-nvme=n
 CONFIG_PACKAGE_nvme-cli=n
 CONFIG_PACKAGE_libnvme=n
 CONFIG_PACKAGE_kmod-ata-ahci=n
 CONFIG_PACKAGE_kmod-ata-core=n
+
 # 移除音频输出驱动与跑分工具
 CONFIG_PACKAGE_kmod-sound-core=n
 CONFIG_PACKAGE_kmod-usb-audio=n
 CONFIG_PACKAGE_coremark=n
+
 # 移除传统老旧 VPN 固件升级组件
 CONFIG_PACKAGE_kmod-ovpn-backports=n
 CONFIG_PACKAGE_luci-app-attendedsysupgrade=n
 
 
 # -----------------------------------------------------------------
-# 6. 系统底层基础框架与防火墙依赖 (保持上游框架，切勿修改)
+# 7. 系统底层基础框架与防火墙依赖 (保持上游框架，切勿修改)
 # -----------------------------------------------------------------
 CONFIG_CCACHE=y
 CONFIG_DEVEL=y
@@ -141,7 +176,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 CONFIG_TARGET_ROOTFS_INITRAMFS=n
 
-# 核心防火墙 (nftables) 与转发架构
+# 核心防火墙 (nftables) 与全锥型 NAT 转发架构 (提升 UDP 穿透)
 CONFIG_PACKAGE_kmod-nft-arp=y
 CONFIG_PACKAGE_kmod-nft-bridge=y
 CONFIG_PACKAGE_kmod-nft-connlimit=y
@@ -184,7 +219,7 @@ CONFIG_PACKAGE_kmod-usb-xhci=y
 
 
 # -----------------------------------------------------------------
-# 7. 强制放开固件打包体积限制 (防止大体积内核撑爆默认空间)
+# 8. 强制放开固件打包体积限制 (防止大体积内核撑爆默认空间)
 # -----------------------------------------------------------------
 # 设定根文件系统打包空间为 1024MB (配合刷入的大容量 GPT 分区)
 CONFIG_TARGET_ROOTFS_PARTSIZE=1024
