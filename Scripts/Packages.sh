@@ -93,7 +93,7 @@ UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
 UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 
 # 【定时控制】引入时间控制插件 (可设置定时任务，或用来管控特定设备的连网时段)
-UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
+# UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
 
 # 【异地组网备用】引入 VNT (另一款轻量级虚拟局域网工具，可与 Tailscale 互为备用打通内外网)
 UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
