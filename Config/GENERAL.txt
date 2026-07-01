@@ -103,9 +103,6 @@ CONFIG_PACKAGE_luci-app-autoreboot=y
 # [MAC 流量统计] Nlbwmon。直观按局域网设备统计流量，排查异常跑流。
 CONFIG_PACKAGE_luci-app-nlbwmon=y
 
-# [外网测速神器] Netspeedtest。因底层 Python3 依赖冲突，当前强制注释屏蔽以保编译通过。
-# CONFIG_PACKAGE_luci-app-netspeedtest=y
-
 # [内网极限测速] iperf3。精准排查局域网内的物理带宽瓶颈。
 CONFIG_PACKAGE_iperf3=y
 
@@ -113,7 +110,7 @@ CONFIG_PACKAGE_iperf3=y
 CONFIG_PACKAGE_luci-app-ddns-go=y
 
 # [设备时间控制] 管控特定设备的连网时段。
-CONFIG_PACKAGE_luci-app-timecontrol=y
+# CONFIG_PACKAGE_luci-app-timecontrol=y
 
 # [eMMC健康检测] 专用于内置 eMMC 芯片寿命损耗与坏块排查，防范系统崩溃风险。
 CONFIG_PACKAGE_mmc-utils=y
