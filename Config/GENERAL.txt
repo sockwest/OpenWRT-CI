@@ -12,7 +12,7 @@ CONFIG_PACKAGE_luci-app-homeproxy=y
 
 # [双擎代理核心] 将两大主流代理内核编译入静态文件。Sing-box 主力，Xray 备用。
 CONFIG_PACKAGE_sing-box=y
-CONFIG_PACKAGE_xray-core=y
+# CONFIG_PACKAGE_xray-core=y
 
 # [DNS 分流防污染] 强大的 DNS 转发器，智能处理国内外 DNS 解析，防止 DNS 泄漏。
 CONFIG_PACKAGE_luci-app-mosdns=y
