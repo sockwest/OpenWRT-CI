@@ -44,6 +44,13 @@ UPDATE_PACKAGE() {
 	fi
 }
 
+# 调用示例
+# UPDATE_PACKAGE "OpenAppFilter" "destan19/OpenAppFilter" "master" "" "custom_name1 custom_name2"
+# UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-appfilter oaf" 这样会把原有的open-app-filter，luci-app-appfilter，oaf相关组件删除，不会出现coremark错误。
+
+# UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
+
+
 # -----------------------------------------------------------------
 # 1. 核心主题与 UI 组件 (全部开启，方便对比测试后筛选)
 # -----------------------------------------------------------------
@@ -64,11 +71,15 @@ UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
 # 【主线代理】拥抱极其稳健的全能方案 (HomeProxy)。走 TUN 网卡模式，完全不依赖严苛的内核 eBPF 特性，100% 保证跨架构编译通过。
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 
-
+# 【异地组网】引入 Tailscale (基于 WireGuard 协议的虚拟局域网，实现跨地域设备无缝直连)
+UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 
 # -----------------------------------------------------------------
 # 3. 实用工具包 (按需精简与核心能力补齐)
 # -----------------------------------------------------------------
+# 【恢复拉取】动态域名穿透：配合 IPv6 方便在外远程管理主路由后台
+UPDATE_PACKAGE "ddns-go" "sirpdboy/luci-app-ddns-go" "main"
+
 # 【恢复拉取】轻量磁盘管理：直观查看和格式化雅典娜 62G eMMC 和外接 U 盘
 UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
 
