@@ -55,15 +55,15 @@ UPDATE_PACKAGE() {
 # 1. 核心主题与 UI 组件 (全部开启，方便对比测试后筛选)
 # -----------------------------------------------------------------
 # 【现代化主题】目前最主流、最稳定的高颜值主题
-UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-25.12"
+# UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-25.12"
 # 【扁平化极简主题】基于 shadcn UI 设计风格的轻量主题
 UPDATE_PACKAGE "shadcn" "eamonxg/luci-theme-shadcn" "main"
 # 【多彩动感主题】Aurora 主题及其控制面板，支持丰富的自定义设置
-UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
-UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
+# UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
+# UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
 # 【多功能动态主题】Kucat 主题及其控制面板，带有一些特效和高度自定义功能
-UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
-UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
+# UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
+# UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
 
 # -----------------------------------------------------------------
 # 2. 核心代理与分流网络组件 (业务架构的基石)
