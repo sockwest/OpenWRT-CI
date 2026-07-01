@@ -146,7 +146,7 @@ UPDATE_VERSION() {
 # -----------------------------------------------------------------
 # 确保 HomeProxy 能随时调用最新版的底层二进制文件，应对特征码封锁
 UPDATE_VERSION "sing-box"
-UPDATE_VERSION "xray-core"
+# UPDATE_VERSION "xray-core"
 
 #引入私有扩展脚本
 if [ -f "$GITHUB_WORKSPACE/Scripts/PRIVATE.sh" ]; then
