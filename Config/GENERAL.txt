@@ -80,20 +80,23 @@ CONFIG_PACKAGE_kmod-dummy=y
 # 4. 核心主题 (UI 界面全开，方便对比测试)
 # -----------------------------------------------------------------
 # [现代化主题] Argon，目前最主流、稳定且高颜值的默认首选。
-CONFIG_PACKAGE_luci-theme-argon=y
+# CONFIG_PACKAGE_luci-theme-argon=y
 # [扁平极简主题] Shadcn，非常轻量。
 CONFIG_PACKAGE_luci-theme-shadcn=y
 # [多彩动感主题] Aurora 及其独立控制面板。
-CONFIG_PACKAGE_luci-theme-aurora=y
-CONFIG_PACKAGE_luci-app-aurora-config=y
+# CONFIG_PACKAGE_luci-theme-aurora=y
+# CONFIG_PACKAGE_luci-app-aurora-config=y
 # [多功能动态主题] Kucat 及其独立控制面板。
-CONFIG_PACKAGE_luci-theme-kucat=y
-CONFIG_PACKAGE_luci-app-kucat-config=y
+# CONFIG_PACKAGE_luci-theme-kucat=y
+# CONFIG_PACKAGE_luci-app-kucat-config=y
 
 
 # -----------------------------------------------------------------
 # 5. 实用运维与排障工具 (日常维护必备)
 # -----------------------------------------------------------------
+# [Web服务面板] uHTTPd 控制台。方便在网页端一键关闭 HTTPS 强制跳转，不再和命令行斗智斗勇。
+CONFIG_PACKAGE_luci-app-uhttpd=y
+
 # [网页端终端] TTYD。无需打开电脑 SSH 软件，直接在浏览器内敲命令行，折腾极方便。
 CONFIG_PACKAGE_luci-app-ttyd=y
 
