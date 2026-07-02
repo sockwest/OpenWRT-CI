@@ -97,9 +97,6 @@ CONFIG_PACKAGE_luci-theme-shadcn=y
 # [网页端终端] TTYD。无需打开电脑 SSH 软件，直接在浏览器内敲命令行，折腾极方便。
 CONFIG_PACKAGE_luci-app-ttyd=y
 
-# [定时重启] 设定凌晨低谷期自动重启，作为长期运行清理内存的兜底防爆策略。
-CONFIG_PACKAGE_luci-app-autoreboot=y
-
 # [MAC 流量统计] Nlbwmon。直观按局域网设备统计流量，排查异常跑流。
 CONFIG_PACKAGE_luci-app-nlbwmon=y
 
