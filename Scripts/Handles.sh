@@ -4,40 +4,7 @@
 
 PKG_PATH="$GITHUB_WORKSPACE/wrt/package/"
 
-# -----------------------------------------------------------------
-# 1. 预置 HomeProxy 核心路由规则字典 (极速启动优化)
-# -----------------------------------------------------------------
-# 逻辑：在编译期提前拉取 Loyalsoldier 的最新 Surge 格式规则库 (包含 CN-IP, GFW 列表等)。
-# 优势：刷机后 HomeProxy 无需在线更新规则即可瞬间启动，避免因刚刷完机网络环境不佳导致规则下载失败。
-# 注意：这只是“数据字典”，绝对不会影响你在 UI 后台配置的“MAC 强扣”和“默认直连”逻辑。
-if [ -d *"homeproxy"* ]; then
-	echo " "
 
-	HP_RULE="surge"
-	HP_PATH="homeproxy/root/etc/homeproxy"
-
-	# 清空默认的旧规则，准备注入最新鲜的规则
-	rm -rf ./$HP_PATH/resources/*
-
-	# 从 GitHub 拉取最新规则库 (只拉取最近一次 commit 以加快打包速度)
-	git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULE/
-	cd ./$HP_RULE/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
-
-	# 生成版本号标识文件，方便在路由器后台直观查看规则版本
-	echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
-	
-	# 提取并转换 IP 与 域名 规则 (适配 HomeProxy 的读取格式)
-	awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
-	sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
-	
-	# 将处理好的纯净版规则移动到 HomeProxy 准备打包的资源目录中
-	mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATH/resources/
-
-	# 清理临时下载的规则源码，保持编译环境绝对整洁
-	cd .. && rm -rf ./$HP_RULE/
-
-	cd $PKG_PATH && echo "homeproxy data has been successfully pre-loaded!"
-fi
 
 # -----------------------------------------------------------------
 # 2. 插件菜单归类与体验优化
